@@ -6,9 +6,9 @@ a set of requests.
 Tom Slee, 2013--2017.
 """
 import logging
-import random
 import time
 import requests
+import secrets
 
 # Set up logging
 LOGGER = logging.getLogger()
@@ -47,7 +47,7 @@ def ws_individual_request(config, url, attempt_id, params=None):
     """
     try:
         # wait
-        sleep_time = config.REQUEST_SLEEP * random.random()
+        sleep_time = config.REQUEST_SLEEP * secrets.SystemRandom().random()
         LOGGER.debug("sleeping " + str(sleep_time)[:7] + " seconds...")
         time.sleep(sleep_time)  # be nice
 
@@ -55,7 +55,7 @@ def ws_individual_request(config, url, attempt_id, params=None):
 
         # If a list of user agent strings is supplied, use it
         if len(config.USER_AGENT_LIST) > 0:
-            user_agent = random.choice(config.USER_AGENT_LIST)
+            user_agent = secrets.SystemRandom().choice(config.USER_AGENT_LIST)
             headers = {"User-Agent": user_agent}
         else:
             headers = {'User-Agent': 'Mozilla/5.0'}
@@ -64,7 +64,7 @@ def ws_individual_request(config, url, attempt_id, params=None):
         http_proxy = None
         LOGGER.debug("Using " + str(len(config.HTTP_PROXY_LIST)) + " proxies")
         if len(config.HTTP_PROXY_LIST) > 0:
-            http_proxy = random.choice(config.HTTP_PROXY_LIST)
+            http_proxy = secrets.SystemRandom().choice(config.HTTP_PROXY_LIST)
             proxies = {
                 'http': http_proxy,
                 'https': http_proxy,
@@ -88,7 +88,7 @@ def ws_individual_request(config, url, attempt_id, params=None):
                     response.status_code, http_proxy)
                 if len(config.HTTP_PROXY_LIST) > 0:
                     # randomly remove the proxy from the list, with probability 50%
-                    if random.choice([True, False]):
+                    if secrets.SystemRandom().choice([True, False]):
                         config.HTTP_PROXY_LIST.remove(http_proxy)
                         LOGGER.warning(
                             "Removing %s from proxy list; %s of %s remain",
