@@ -20,77 +20,77 @@ class printColor:
 
 def runit(survey_id, details):
     filename = "survey-{}.log".format(survey_id)
-    log_file_object=open(filename)
-    dt_objects = []
-    dt_diffs = []
+    with open(filename) as log_file_object:
+        dt_objects = []
+        dt_diffs = []
 
-    connection_error_count = 0
-    total_connection_error_count = 0
-    node_results_list = []
-    page_and_zoom_complete = 0
-    survey_complete = False
-    # Collect data from lines in the log
-    # 2018-02-07 05:17:02,836 INFO    Searching rectangle: Shared room, guests = 2, prices in [60, 80], zoom factor = 1
-    # 2018-02-07 05:17:04,114 INFO    Page 01 returned 01 listings
-    # 2018-02-07 05:17:04,114 INFO    Results:  1 pages, 20 new rooms
-    p_page = re.compile(r"([0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}),([0-9]{3}) INFO    Page ([0-9]{2}) returned ([0-9]+) listings")
-    p_rectangle = re.compile(r"Searching rectangle:\s+zoom factor = ([0-9]+), node\s*=\s*(.*)")
-    p_result = re.compile(r"Results:\s+([0-9]+) pages, ([0-9]+) new")
-    p_survey = re.compile(r"Survey\s+([0-9]+), for (.*)")
-    p_max_zoom = re.compile("Searching by bounding box, max_zoom=([0-9]+)")
+        connection_error_count = 0
+        total_connection_error_count = 0
+        node_results_list = []
+        page_and_zoom_complete = 0
+        survey_complete = False
+        # Collect data from lines in the log
+        # 2018-02-07 05:17:02,836 INFO    Searching rectangle: Shared room, guests = 2, prices in [60, 80], zoom factor = 1
+        # 2018-02-07 05:17:04,114 INFO    Page 01 returned 01 listings
+        # 2018-02-07 05:17:04,114 INFO    Results:  1 pages, 20 new rooms
+        p_page = re.compile(r"([0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}),([0-9]{3}) INFO    Page ([0-9]{2}) returned ([0-9]+) listings")
+        p_rectangle = re.compile(r"Searching rectangle:\s+zoom factor = ([0-9]+), node\s*=\s*(.*)")
+        p_result = re.compile(r"Results:\s+([0-9]+) pages, ([0-9]+) new")
+        p_survey = re.compile(r"Survey\s+([0-9]+), for (.*)")
+        p_max_zoom = re.compile("Searching by bounding box, max_zoom=([0-9]+)")
 
-    # Read raw data from the log file
-    firstline = log_file_object.readline()
-    p_date = re.compile("[0-9]{4}-[0-9]{2}-[0-9]{2}")
-    match = p_date.search(firstline)
-    survey_start_date = match.group(0)
-    zoom = 0
-    max_zoom = 20
+        # Read raw data from the log file
+        firstline = log_file_object.readline()
+        p_date = re.compile("[0-9]{4}-[0-9]{2}-[0-9]{2}")
+        match = p_date.search(firstline)
+        survey_start_date = match.group(0)
+        zoom = 0
+        max_zoom = 20
 
-    for line in log_file_object:
-        # Response time raw data for page requests
-        if "DEBUG" in line:
-            pass
-        if "Page" in line:
-            match = p_page.match(line)
-            dt_string = match.group(1)
-            dt_objects.append([datetime.strptime(dt_string, "%Y-%m-%d %H:%M:%S"),
-                               connection_error_count])
-            connection_error_count = 0
-            if zoom == max_zoom and int(match.group(3)) == 20 and int(match.group(4)) == 18:
-                page_and_zoom_complete += 1
-        # Node details (at beginning of a node searchk
-        elif "Searching rectangle:" in line:
-            match = p_rectangle.search(line)
-            if match:
-                zoom = int(match.group(1))
-                node = match.group(2)
-        elif "Results: " in line:
+        for line in log_file_object:
+            # Response time raw data for page requests
+            if "DEBUG" in line:
+                pass
+            if "Page" in line:
+                match = p_page.match(line)
+                dt_string = match.group(1)
+                dt_objects.append([datetime.strptime(dt_string, "%Y-%m-%d %H:%M:%S"),
+                                   connection_error_count])
+                connection_error_count = 0
+                if zoom == max_zoom and int(match.group(3)) == 20 and int(match.group(4)) == 18:
+                    page_and_zoom_complete += 1
+            # Node details (at beginning of a node searchk
+            elif "Searching rectangle:" in line:
+                match = p_rectangle.search(line)
+                if match:
+                    zoom = int(match.group(1))
+                    node = match.group(2)
+            elif "Results: " in line:
         # Results of a node search: record the zoom from the beginning
-            match = p_result.search(line)
-            if match:
-                pages = int(match.group(1))
-                new_rooms = int(match.group(2))
-                # Add an item to the new rooms list for this node
-                node_results_list.append(
-                    {"zoom": zoom, "node": node,
-                     "pages": pages, "new_rooms": new_rooms}
-                )
-        # Request error
-        elif "WARNING" in line and "connectionError" in line:
-            total_connection_error_count += 1
-        elif "WARNING" in line and "HTTP status" in line:
-            total_connection_error_count += 1
-        # For complete log files (one run, beginning to end), these items are in the header
-        # Put them at the end of the ifs as they are rarely encountered
-        elif "Survey " in line:
-            match = p_survey.search(line)
-            search_area = match.group(2)
-        elif "Finishing survey" in line:
-            survey_complete = True
+                match = p_result.search(line)
+                if match:
+                    pages = int(match.group(1))
+                    new_rooms = int(match.group(2))
+                    # Add an item to the new rooms list for this node
+                    node_results_list.append(
+                        {"zoom": zoom, "node": node,
+                         "pages": pages, "new_rooms": new_rooms}
+                    )
+            # Request error
+            elif "WARNING" in line and "connectionError" in line:
+                total_connection_error_count += 1
+            elif "WARNING" in line and "HTTP status" in line:
+                total_connection_error_count += 1
+            # For complete log files (one run, beginning to end), these items are in the header
+            # Put them at the end of the ifs as they are rarely encountered
+            elif "Survey " in line:
+                match = p_survey.search(line)
+                search_area = match.group(2)
+            elif "Finishing survey" in line:
+                survey_complete = True
         # elif "max_zoom" in line:
-            # match = p_max_zoom.search(line)
-            # max_zoom = int(match.group(1))
+                # match = p_max_zoom.search(line)
+                # max_zoom = int(match.group(1))
 
     #------------------------------------------------------------------------
     # Calculations
