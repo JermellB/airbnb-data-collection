@@ -9,6 +9,7 @@ import logging
 import random
 import time
 import requests
+from security import safe_requests
 
 # Set up logging
 LOGGER = logging.getLogger()
@@ -77,7 +78,7 @@ def ws_individual_request(config, url, attempt_id, params=None):
         # Now make the request
         # cookie to avoid auto-redirect
         cookies = dict(sticky_locale='en')
-        response = requests.get(url, params, timeout=timeout,
+        response = safe_requests.get(url, params, timeout=timeout,
                                 headers=headers, cookies=cookies, proxies=proxies)
         if response.status_code < 300:
             return response
