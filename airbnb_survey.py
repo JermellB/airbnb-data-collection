@@ -85,7 +85,7 @@ class ABSurvey():
             raise
         except Exception:
             cur.close()
-            logger.error("No search area for survey_id " + str(self.survey_id))
+            logger.error("No search area for survey_id %s", str(self.survey_id))
             raise
 
     def update_survey_entry(self, search_by):
@@ -210,7 +210,7 @@ class ABSurvey():
         try:
             page_info = (self.survey_id, room_type, neighborhood_id,
                          guests, section_offset, has_rooms)
-            logger.debug("Search page: " + str(page_info))
+            logger.debug("Search page: %s", str(page_info))
             sql = """
             insert into survey_progress_log
             (survey_id, room_type, neighborhood_id,
@@ -222,8 +222,7 @@ class ABSurvey():
             cur.execute(sql, page_info)
             cur.close()
             conn.commit()
-            logger.debug("Logging survey search page for neighborhood " +
-                         str(neighborhood_id))
+            logger.debug("Logging survey search page for neighborhood %s", str(neighborhood_id))
             return True
         except psycopg2.Error as pge:
             logger.error(pge.pgerror)
@@ -280,7 +279,7 @@ class ABSurvey():
                 else:
                     params = (self.survey_id, room_type, neighborhood, guests,
                               page_number,)
-                    logger.debug("Params: " + str(params))
+                    logger.debug("Params: %s", str(params))
                     sql = """
                     select spl.has_rooms
                     from survey_progress_log spl
@@ -1019,10 +1018,7 @@ class ABSurveyByNeighborhood(ABSurvey):
                                    section_offset, flag):
         try:
             logger.info("-" * 70)
-            logger.info(room_type + ", " +
-                        str(neighborhood) + ", " +
-                        str(guests) + " guests, " +
-                        "page " + str(section_offset))
+            logger.info("%s, %s, %s guests, page %s", room_type, str(neighborhood), str(guests), str(section_offset))
             new_rooms = 0
             room_count = 0
             params = {}
@@ -1200,17 +1196,14 @@ class ABSurveyByZipcode(ABSurvey):
             cur.close()
             return zipcodes
         except Exception:
-            logger.error("Failed to retrieve zipcodes for search_area" +
-                        str(self.search_area_id))
+            logger.error("Failed to retrieve zipcodes for search_area%s", str(self.search_area_id))
             raise
 
     def get_search_page_info_zipcode(self, room_type,
                                      zipcode, guests, section_offset, flag):
         try:
             logger.info("-" * 70)
-            logger.info(room_type + ", zipcode " + str(zipcode) + ", " +
-                        str(guests) + " guests, " + "page " +
-                        str(section_offset + 1))
+            logger.info("%s, zipcode %s, %s guests, page %s", room_type, str(zipcode), str(guests), str(section_offset + 1))
             room_count = 0
             new_rooms = 0
             params = {}

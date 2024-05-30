@@ -48,7 +48,7 @@ def ws_individual_request(config, url, attempt_id, params=None):
     try:
         # wait
         sleep_time = config.REQUEST_SLEEP * random.random()
-        LOGGER.debug("sleeping " + str(sleep_time)[:7] + " seconds...")
+        LOGGER.debug("sleeping %s seconds...", str(sleep_time)[:7])
         time.sleep(sleep_time)  # be nice
 
         timeout = config.HTTP_TIMEOUT
@@ -62,7 +62,7 @@ def ws_individual_request(config, url, attempt_id, params=None):
 
         # If there is a list of proxies supplied, use it
         http_proxy = None
-        LOGGER.debug("Using " + str(len(config.HTTP_PROXY_LIST)) + " proxies")
+        LOGGER.debug("Using %s proxies", str(len(config.HTTP_PROXY_LIST)))
         if len(config.HTTP_PROXY_LIST) > 0:
             http_proxy = random.choice(config.HTTP_PROXY_LIST)
             proxies = {

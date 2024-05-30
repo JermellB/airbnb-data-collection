@@ -52,7 +52,7 @@ def init():
             username = os.environ['USER']
         config_file = username + ".config"
         if not os.path.isfile(config_file):
-            logging.error("Configuration file " + config_file + " not found.")
+            logging.error("Configuration file %s not found.", config_file)
             sys.exit()
         config.read(config_file)
         # database

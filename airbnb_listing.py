@@ -70,7 +70,7 @@ class ABListing():
                              value is None
                              }
         if len(unassigned_values) > 9:  # just a value indicating deleted
-            logger.info("Room " + str(self.room_id) + ": marked deleted")
+            logger.info("Room %s: marked deleted", str(self.room_id))
             status = False  # probably deleted
             self.deleted = 1
         else:
@@ -100,7 +100,7 @@ class ABListing():
 
     def save_as_deleted(self):
         try:
-            logger.debug("Marking room deleted: " + str(self.room_id))
+            logger.debug("Marking room deleted: %s", str(self.room_id))
             if self.survey_id is None:
                 return
             conn = self.config.connect()
@@ -139,7 +139,7 @@ class ABListing():
                         self.__insert()
                         return True
                     except psycopg2.IntegrityError:
-                        logger.debug("Room " + str(self.room_id) + ": already collected")
+                        logger.debug("Room %s: already collected", str(self.room_id))
                         return False
         except psycopg2.OperationalError:
             # connection closed
@@ -157,17 +157,16 @@ class ABListing():
         except psycopg2.Error as pge:
             # database error: rollback operations and resume
             self.config.connection.conn.rollback()
-            logger.error("Database error: " + str(self.room_id))
+            logger.error("Database error: %s", str(self.room_id))
             logger.error("Diagnostics " + pge.diag.message_primary)
             del(self.config.connection)
         except (KeyboardInterrupt, SystemExit):
             raise
         except UnicodeEncodeError as uee:
-            logger.error("UnicodeEncodeError Exception at " +
-                         str(uee.object[uee.start:uee.end]))
+            logger.error("UnicodeEncodeError Exception at %s", str(uee.object[uee.start:uee.end]))
             raise
         except ValueError:
-            logger.error("ValueError for room_id = " + str(self.room_id))
+            logger.error("ValueError for room_id = %s", str(self.room_id))
         except AttributeError:
             logger.error("AttributeError")
             raise
@@ -240,8 +239,7 @@ class ABListing():
         try:
             # initialization
             logger.info("-" * 70)
-            logger.info("Room " + str(self.room_id) +
-                        ": getting from Airbnb web site")
+            logger.info("Room %s: getting from Airbnb web site", str(self.room_id))
             room_url = self.config.URL_ROOM_ROOT + str(self.room_id)
             response = airbnb_ws.ws_request_with_repeats(self.config, room_url)
             if response is not None:
@@ -258,7 +256,7 @@ class ABListing():
         except Exception as ex:
             logger.exception("Room " + str(self.room_id) +
                              ": failed to retrieve from web site.")
-            logger.error("Exception: " + str(type(ex)))
+            logger.error("Exception: %s", str(type(ex)))
             raise
 
     def __insert(self):
@@ -297,7 +295,7 @@ class ABListing():
             cur.execute(sql, insert_args)
             cur.close()
             conn.commit()
-            logger.debug("Room " + str(self.room_id) + ": inserted")
+            logger.debug("Room %s: inserted", str(self.room_id))
             logger.debug("(lat, long) = ({lat:+.5f}, {lng:+.5f})".format(lat=self.latitude, lng=self.longitude))
         except psycopg2.IntegrityError:
             # logger.info("Room " + str(self.room_id) + ": insert failed")
@@ -347,8 +345,7 @@ class ABListing():
             logger.debug("Closing...")
             cur.close()
             conn.commit()
-            logger.info("Room " + str(self.room_id) +
-                        ": updated (" + str(rowcount) + ")")
+            logger.info("Room %s: updated (%s)", str(self.room_id), str(rowcount))
             return rowcount
         except:
             # may want to handle connection close errors

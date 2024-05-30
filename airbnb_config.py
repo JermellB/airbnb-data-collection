@@ -95,8 +95,7 @@ class ABConfig():
                 self.USER_AGENT_LIST = [x.strip() for x in self.USER_AGENT_LIST]
                 self.USER_AGENT_LIST = [x.strip('"') for x in self.USER_AGENT_LIST]
             except Exception:
-                logger.info("No user agent list in " + username +
-                             ".config: not using user agents")
+                logger.info("No user agent list in %s.config: not using user agents", username)
                 self.USER_AGENT_LIST = []
             self.MAX_CONNECTION_ATTEMPTS = \
                 int(config["NETWORK"]["max_connection_attempts"])

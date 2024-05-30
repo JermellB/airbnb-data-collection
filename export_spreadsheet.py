@@ -244,12 +244,10 @@ def export_city_data(ab_config, city, project, format, start_date):
                              params={"survey_id": survey_id}
                              )
             if len(df) > 0:
-                logging.info("Survey " + str(survey_id) +
-                             ": to Excel worksheet")
+                logging.info("Survey %s: to Excel worksheet", str(survey_id))
                 df.to_excel(writer, sheet_name=str(survey_date))
             else:
-                logging.info("Survey " + str(survey_id) +
-                             " not in production project: ignoring")
+                logging.info("Survey %s not in production project: ignoring", str(survey_id))
 
         # neighborhood summaries
         if project == "gis":
