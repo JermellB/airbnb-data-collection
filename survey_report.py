@@ -40,7 +40,7 @@ def runit(survey_id, details):
     p_max_zoom = re.compile("Searching by bounding box, max_zoom=([0-9]+)")
 
     # Read raw data from the log file
-    firstline = log_file_object.readline()
+    firstline = log_file_object.readline(5_000_000)
     p_date = re.compile("[0-9]{4}-[0-9]{2}-[0-9]{2}")
     match = p_date.search(firstline)
     survey_start_date = match.group(0)
