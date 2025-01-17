@@ -11,7 +11,6 @@
 # ============================================================================
 import logging
 import sys
-import random
 import psycopg2
 import time
 from datetime import date
@@ -19,6 +18,7 @@ from bs4 import BeautifulSoup
 import json
 from airbnb_listing import ABListing
 import airbnb_ws
+import secrets
 
 logger = logging.getLogger()
 
@@ -1276,7 +1276,7 @@ def ABSurveyGlobal(ABSurvey):
         while room_count < self.config.FILL_MAX_ROOM_COUNT:
             try:
                 # get a random candidate room_id
-                room_id = random.randint(0, self.config.ROOM_ID_UPPER_BOUND)
+                room_id = secrets.SystemRandom().randint(0, self.config.ROOM_ID_UPPER_BOUND)
                 listing = ABListing(self.config, room_id, self.survey_id)
                 if room_id is None:
                     break
